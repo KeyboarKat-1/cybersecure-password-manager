@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -26,10 +27,11 @@ def register():
 
         username = request.form.get("username")
         password = request.form.get("password")
+        hashed_password = generate_password_hash(password)
 
         new_user = User(
             username=username,
-            password=password
+            password=hashed_password
         )
 
         db.session.add(new_user)
@@ -49,15 +51,15 @@ def login():
         password = request.form.get("password")
 
         user = User.query.filter_by(
-            username=username,
-            password=password
+            username=username
         ).first()
 
-        if user:
+        if user and check_password_hash(user.password, password):
+
             return redirect(url_for("dashboard"))
+
         else:
             return "Invalid Username or Password"
-
     return render_template("login.html")
 
 @app.route("/dashboard")
