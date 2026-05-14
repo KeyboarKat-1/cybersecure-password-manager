@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,25 +7,37 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-    <div class="container">
+    <div class="container large-container">
 
         <h1>Password Vault 🔐</h1>
+
+        <p>Welcome, {{ username }}</p>
+
+        <a href="/logout">
+            <button>Logout</button>
+        </a>
+
+        <br><br>
 
         <form method="POST">
 
             <input type="text"
                    name="website"
-                   placeholder="Website Name">
+                   placeholder="Website Name"
+                   required>
 
             <input type="text"
                    name="account_username"
-                   placeholder="Account Username">
+                   placeholder="Account Username"
+                   required>
 
             <input type="password"
                    name="account_password"
-                   placeholder="Password">
+                   placeholder="Password"
+                   required>
 
             <button type="submit">
                 Save Password
@@ -34,13 +45,11 @@
 
         </form>
 
-
-        <!-- PLACE TABLE HERE -->
-
+        <h3>{{ strength_message }}</h3>
 
         <h2>Saved Passwords</h2>
 
-        <table border="1" width="100%">
+        <table>
 
             <tr>
                 <th>Website</th>
@@ -52,16 +61,36 @@
             {% for entry in entries %}
 
             <tr>
+
                 <td>{{ entry.website }}</td>
 
                 <td>{{ entry.account_username }}</td>
 
-                <td>{{ entry.account_password }}</td>
+                <td>
+
+                    <span id="password-{{ entry.id }}">
+                        ********
+                    </span>
+
+                    <br><br>
+
+                    <button
+                        type="button"
+                        class="show-btn"
+                        onclick="togglePassword('{{ entry.id }}', '{{ entry.account_password }}')">
+
+                        👁 Show
+
+                    </button>
+
+                </td>
+
                 <td>
                     <a href="/delete/{{ entry.id }}">
-                    Delete
+                        Delete
                     </a>
                 </td>
+
             </tr>
 
             {% endfor %}
@@ -69,6 +98,8 @@
         </table>
 
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>
