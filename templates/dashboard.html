@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +10,65 @@
 </head>
 <body>
 
-    <h1>Welcome to Dashboard 🔐</h1>
+    <div class="container">
 
-    <p>Login Successful!</p>
+        <h1>Password Vault 🔐</h1>
+
+        <form method="POST">
+
+            <input type="text"
+                   name="website"
+                   placeholder="Website Name">
+
+            <input type="text"
+                   name="account_username"
+                   placeholder="Account Username">
+
+            <input type="password"
+                   name="account_password"
+                   placeholder="Password">
+
+            <button type="submit">
+                Save Password
+            </button>
+
+        </form>
+
+
+        <!-- PLACE TABLE HERE -->
+
+
+        <h2>Saved Passwords</h2>
+
+        <table border="1" width="100%">
+
+            <tr>
+                <th>Website</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Action</th>
+            </tr>
+
+            {% for entry in entries %}
+
+            <tr>
+                <td>{{ entry.website }}</td>
+
+                <td>{{ entry.account_username }}</td>
+
+                <td>{{ entry.account_password }}</td>
+                <td>
+                    <a href="/delete/{{ entry.id }}">
+                    Delete
+                    </a>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
 
 </body>
 </html>

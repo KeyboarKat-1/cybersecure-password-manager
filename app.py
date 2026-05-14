@@ -12,8 +12,17 @@ class User(db.Model):
 
     username = db.Column(db.String(100), unique=True)
 
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(300))
 
+class PasswordEntry(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    website = db.Column(db.String(100))
+
+    account_username = db.Column(db.String(100))
+
+    account_password = db.Column(db.String(200))
 
 @app.route("/")
 def home():
@@ -62,11 +71,46 @@ def login():
             return "Invalid Username or Password"
     return render_template("login.html")
 
-@app.route("/dashboard")
+@app.route("/delete/<int:id>")
+def delete(id):
+
+    entry = PasswordEntry.query.get(id)
+
+    db.session.delete(entry)
+
+    db.session.commit()
+
+    return redirect(url_for("dashboard"))
+
+@app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
-    return render_template("dashboard.html")
 
+    if request.method == "POST":
 
+        website = request.form.get("website")
+
+        account_username = request.form.get("account_username")
+
+        account_password = request.form.get("account_password")
+
+        new_entry = PasswordEntry(
+            website=website,
+            account_username=account_username,
+            account_password=account_password
+        )
+
+        db.session.add(new_entry)
+
+        db.session.commit()
+
+    entries = PasswordEntry.query.all()
+
+    return render_template(
+        "dashboard.html",
+        entries=entries
+    )
+
+    
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
