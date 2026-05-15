@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="notification-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="notification notification-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <h1>Two-Factor Authentication</h1>
+
+        <div class="otp-instructions">
+            <p>Enter the 6-digit code from your authenticator app to complete your login.</p>
+        </div>
+
+        <form method="POST" class="otp-form">
+
+            <div class="otp-input-group">
+                <label for="otp_code">Authentication Code</label>
+                <input type="text"
+                       id="otp_code"
+                       name="otp_code"
+                       placeholder="000000"
+                       pattern="[0-9]{6}"
+                       maxlength="6"
+                       required
+                       autocomplete="off">
+                <small>Enter the 6-digit code from your authenticator app</small>
+            </div>
+
+            <button type="submit" class="btn-otp">
+                Verify Code
+            </button>
+
+        </form>
+
+        <div class="otp-links">
+            <a href="/login" class="btn-secondary">← Back to Login</a>
+        </div>
+
+    </div>
+
+    <script>
+        // Auto-focus the OTP input
+        document.getElementById('otp_code').focus();
+
+        // Auto-submit when 6 digits are entered
+        document.getElementById('otp_code').addEventListener('input', function(e) {
+            if (this.value.length === 6) {
+                this.form.submit();
+            }
+        });
+    </script>
+
+</body>
+</html>

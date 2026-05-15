@@ -3,29 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Manager</title>
-
+    <title>CyberSecure - Enterprise Password Management</title>
+    <meta name="description" content="Advanced password manager with military-grade encryption, two-factor authentication, and real-time security monitoring.">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">🔐</div>
+                <span class="brand-text">CyberSecure</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#security" class="nav-link">Security</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="/login" class="btn btn-secondary">Login</a>
+                <a href="/register" class="btn btn-primary">Get Started</a>
+            </div>
+            <div class="mobile-menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-icon">🛡️</span>
+                    Military-Grade Security
+                </div>
+                <h1 class="hero-title">
+                    <span class="gradient-text">Fortify Your Digital Life</span>
+                    <br>with Enterprise Password Protection
+                </h1>
+                <p class="hero-subtitle">
+                    Advanced password management with AES-256 encryption, two-factor authentication,
+                    real-time breach monitoring, and secure encrypted exports. Protect what matters most.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">256-bit</div>
+                        <div class="stat-label">AES Encryption</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">2FA</div>
+                        <div class="stat-label">Authentication</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Breach Monitoring</div>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a href="/register" class="btn btn-primary btn-large">
+                        <span class="btn-icon">🚀</span>
+                        Start Protecting Now
+                    </a>
+                    <a href="#features" class="btn btn-secondary btn-large">
+                        <span class="btn-icon">📋</span>
+                        Explore Features
+                    </a>
+                </div>
+                <div class="hero-trust">
+                    <div class="trust-icons">
+                        <div class="trust-item">
+                            <span class="trust-icon">🔒</span>
+                            <span>Zero-Knowledge Architecture</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-icon">🌐</span>
+                            <span>Open Source & Auditable</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-icon">⚡</span>
+                            <span>Lightning Fast & Secure</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="security-shield">
+                    <div class="shield-core">
+                        <div class="shield-glow"></div>
+                        <div class="shield-pattern"></div>
+                        <div class="shield-text">SECURE</div>
+                    </div>
+                    <div class="floating-elements">
+                        <div class="floating-element elem-1">🔐</div>
+                        <div class="floating-element elem-2">🛡️</div>
+                        <div class="floating-element elem-3">🔑</div>
+                        <div class="floating-element elem-4">⚡</div>
+                        <div class="floating-element elem-5">🔒</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-pattern"></div>
+    </section>
 
-        <h1>CyberSecure Password Manager 🔐</h1>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Security Features</h2>
+                <p class="section-subtitle">Comprehensive protection for your digital assets with cutting-edge security technology</p>
+            </div>
 
-        <p>Secure Full-Stack Flask Application</p>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-icon">
+                        <span class="icon-bg">🔐</span>
+                    </div>
+                    <h3 class="feature-title">AES-256 Encryption</h3>
+                    <p class="feature-description">
+                        Military-grade encryption protects your passwords with AES-256, the same standard used by governments and financial institutions worldwide.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">Bank-Level Security</span>
+                    </div>
+                </div>
 
-        <a href="/register">
-            <button>Register</button>
-        </a>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">
+                        <span class="icon-bg">📱</span>
+                    </div>
+                    <h3 class="feature-title">Two-Factor Authentication</h3>
+                    <p class="feature-description">
+                        Add an extra layer of security with TOTP-based 2FA. Compatible with Google Authenticator, Authy, and all major authenticator apps.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">Time-Based OTP</span>
+                    </div>
+                </div>
 
-        <br><br>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">
+                        <span class="icon-bg">🔍</span>
+                    </div>
+                    <h3 class="feature-title">Breach Detection</h3>
+                    <p class="feature-description">
+                        Real-time monitoring against known password breaches using the Have I Been Pwned API. Get instant alerts about compromised credentials.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">Real-Time Monitoring</span>
+                    </div>
+                </div>
 
-        <a href="/login">
-            <button>Login</button>
-        </a>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">
+                        <span class="icon-bg">📊</span>
+                    </div>
+                    <h3 class="feature-title">Encrypted Exports</h3>
+                    <p class="feature-description">
+                        Export your passwords securely in encrypted CSV or JSON formats. Files are protected with user-defined passwords for maximum security.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">Secure Backup</span>
+                    </div>
+                </div>
 
-    </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">
+                        <span class="icon-bg">🔎</span>
+                    </div>
+                    <h3 class="feature-title">Smart Search & Filter</h3>
+                    <p class="feature-description">
+                        Instantly find passwords with real-time search across websites, usernames, and categories. Filter by risk levels and breach status.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">Instant Results</span>
+                    </div>
+                </div>
 
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">
+                        <span class="icon-bg">🤖</span>
+                    </div>
+                    <h3 class="feature-title">AI Security Assistant</h3>
+                    <p class="feature-description">
+                        Get intelligent security recommendations, password strength analysis, and cybersecurity best practices from our AI assistant.
+                    </p>
+                    <div class="feature-highlight">
+                        <span class="highlight-badge">AI-Powered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section id="security" class="security">
+        <div class="container">
+            <div class="security-content">
+                <div class="security-text">
+                    <h2 class="section-title">Uncompromising Security</h2>
+                    <p class="section-subtitle">
+                        Your security is our top priority. Every aspect of CyberSecure is designed with
+                        privacy and protection in mind.
+                    </p>
+
+                    <div class="security-features">
+                        <div class="security-item">
+                            <div class="security-icon">🔐</div>
+                            <div class="security-details">
+                                <h4>End-to-End Encryption</h4>
+                                <p>All data is encrypted before leaving your device and remains encrypted in our database.</p>
+                            </div>
+                        </div>
+
+                        <div class="security-item">
+                            <div class="security-icon">🚫</div>
+                            <div class="security-details">
+                                <h4>Zero-Knowledge Architecture</h4>
+                                <p>We cannot access your passwords. Only you have the master encryption keys.</p>
+                            </div>
+                        </div>
+
+                        <div class="security-item">
+                            <div class="security-icon">🔒</div>
+                            <div class="security-details">
+                                <h4>Secure Session Management</h4>
+                                <p>Automatic session timeouts and secure cookie handling prevent unauthorized access.</p>
+                            </div>
+                        </div>
+
+                        <div class="security-item">
+                            <div class="security-icon">🛡️</div>
+                            <div class="security-details">
+                                <h4>Advanced Threat Protection</h4>
+                                <p>Built-in protection against brute force attacks, session hijacking, and common vulnerabilities.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-visual">
+                    <div class="security-diagram">
+                        <div class="diagram-layer layer-1">
+                            <div class="layer-icon">🌐</div>
+                            <div class="layer-label">Web Interface</div>
+                        </div>
+                        <div class="diagram-layer layer-2">
+                            <div class="layer-icon">🔐</div>
+                            <div class="layer-label">AES-256 Encryption</div>
+                        </div>
+                        <div class="diagram-layer layer-3">
+                            <div class="layer-icon">🗄️</div>
+                            <div class="layer-label">Secure Database</div>
+                        </div>
+                        <div class="diagram-layer layer-4">
+                            <div class="layer-icon">🔑</div>
+                            <div class="layer-label">Your Master Key</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Secure Your Digital Life?</h2>
+                <p class="cta-subtitle">
+                    Join thousands of users who trust CyberSecure with their most valuable digital assets.
+                    Start protecting your passwords today.
+                </p>
+                <div class="cta-actions">
+                    <a href="/register" class="btn btn-primary btn-xl">
+                        <span class="btn-icon">🚀</span>
+                        Create Free Account
+                    </a>
+                    <a href="/login" class="btn btn-secondary btn-xl">
+                        <span class="btn-icon">🔑</span>
+                        Sign In
+                    </a>
+                </div>
+                <div class="cta-features">
+                    <span class="cta-feature">✓ Free to use</span>
+                    <span class="cta-feature">✓ No credit card required</span>
+                    <span class="cta-feature">✓ Open source</span>
+                    <span class="cta-feature">✓ Self-hosted</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand-icon">🔐</div>
+                    <span class="brand-text">CyberSecure</span>
+                    <p>Enterprise-grade password security for everyone.</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="#security">Security</a>
+                        <a href="/ai-assistant">AI Assistant</a>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <a href="/login">Login</a>
+                        <a href="/register">Register</a>
+                        <a href="#about">About</a>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Security</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 CyberSecure. Built with Flask and modern security practices.</p>
+                <div class="footer-badges">
+                    <span class="footer-badge">🔒 Secure</span>
+                    <span class="footer-badge">🚀 Fast</span>
+                    <span class="footer-badge">🛡️ Protected</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='landing.js') }}"></script>
 </body>
 </html>

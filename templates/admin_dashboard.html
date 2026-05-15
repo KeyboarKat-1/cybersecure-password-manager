@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Cybersecurity Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="notification-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification notification-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="dashboard-shell">
+        <header class="dashboard-header dashboard-header-admin">
+            <div>
+                <p class="eyebrow">Administrator Console</p>
+                <h1>Cybersecurity Monitoring</h1>
+                <p class="subtitle">Track user behavior, login events, suspicious activity, and password risk across the platform.</p>
+            </div>
+            <div class="header-actions">
+                <p class="user-pill">Admin signed in as <strong>{{ username }}</strong></p>
+                <a href="/dashboard" class="btn btn-secondary">User Dashboard</a>
+                <button id="theme-toggle" class="btn btn-secondary" type="button">Light mode</button>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <main class="admin-grid">
+            <section class="analytics-panel glass-card">
+                <div class="panel-heading">
+                    <h2>Security overview</h2>
+                    <p>Live platform metrics and threat indicators from the password manager.</p>
+                </div>
+                <div class="metrics-grid">
+                    <article class="metric-card metric-primary">
+                        <p class="metric-label">Total Users</p>
+                        <strong>{{ total_users }}</strong>
+                    </article>
+                    <article class="metric-card metric-secondary">
+                        <p class="metric-label">Saved Passwords</p>
+                        <strong>{{ total_passwords }}</strong>
+                    </article>
+                    <article class="metric-card metric-success">
+                        <p class="metric-label">Successful Logins</p>
+                        <strong>{{ total_successful_logins }}</strong>
+                    </article>
+                    <article class="metric-card metric-warning">
+                        <p class="metric-label">Failed Login Attempts</p>
+                        <strong>{{ total_failed_attempts }}</strong>
+                    </article>
+                    <article class="metric-card metric-danger">
+                        <p class="metric-label">Active Lockouts</p>
+                        <strong>{{ active_lockouts }}</strong>
+                    </article>
+                    <article class="metric-card metric-info">
+                        <p class="metric-label">Password Risk Score</p>
+                        <strong>{{ risk_assessment.overall_score }}%</strong>
+                    </article>
+                </div>
+            </section>
+
+            <section class="threat-card glass-card">
+                <div class="panel-heading">
+                    <h2>Risk categories</h2>
+                    <p>See how passwords are classified across risk levels.</p>
+                </div>
+                <div class="risk-summary-grid">
+                    {% for level, count in risk_counts.items() %}
+                        <div class="risk-tile risk-{{ level }}">
+                            <span class="risk-level">{{ level|capitalize }}</span>
+                            <strong>{{ count }}</strong>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="risk-note">
+                    <p>Risk score combines password strength, reuse, breach exposure, and category sensitivity.</p>
+                </div>
+            </section>
+
+            <section class="activity-card glass-card">
+                <div class="panel-heading">
+                    <h2>Suspicious activity</h2>
+                    <p>Recent failed logins and high-risk authentication attempts from the last 24 hours.</p>
+                </div>
+                <div class="activity-list">
+                    {% if suspicious_attempts %}
+                        {% for attempt in suspicious_attempts %}
+                            <div class="activity-item">
+                                <div>
+                                    <p class="activity-user">{{ attempt.username or 'Unknown' }}</p>
+                                    <p class="activity-meta">{{ attempt.method|upper }} • {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} • {{ attempt.source_ip }}</p>
+                                </div>
+                                <span class="badge badge-breach">{{ attempt.reason or 'Suspicious login' }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="small-note">No suspicious activity detected in the last 24 hours.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="report-card glass-card">
+                <div class="panel-heading">
+                    <h2>Top risk credentials</h2>
+                    <p>Highest-risk saved passwords across the entire platform.</p>
+                </div>
+                <div class="table-scroll">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Website</th>
+                                <th>Username</th>
+                                <th>Risk Score</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_risk_entries %}
+                                <tr>
+                                    <td>{{ item.website }}</td>
+                                    <td>{{ item.username }}</td>
+                                    <td><span class="risk-badge risk-{{ get_risk_level(item.risk_score) }}">{{ item.risk_score|round(0) }}</span></td>
+                                    <td>{{ item.category|title }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="activity-card glass-card">
+                <div class="panel-heading">
+                    <h2>Recent login activity</h2>
+                    <p>Latest authentication events with source IP and response status.</p>
+                </div>
+                <div class="table-scroll">
+                    <table class="admin-table compact">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Result</th>
+                                <th>Method</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in recent_attempts %}
+                                <tr>
+                                    <td>{{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ attempt.username or 'Unknown' }}</td>
+                                    <td>{{ 'Success' if attempt.success else 'Failure' }}</td>
+                                    <td>{{ attempt.method|upper }}</td>
+                                    <td>{{ attempt.source_ip }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="threat-card glass-card">
+                <div class="panel-heading">
+                    <h2>Users with repeated failed logins</h2>
+                    <p>Highest-risk accounts based on repeated invalid login activity.</p>
+                </div>
+                <div class="repeat-failures">
+                    {% if repeated_failure_users %}
+                        {% for username, failures in repeated_failure_users %}
+                            <div class="repeat-item">
+                                <strong>{{ username }}</strong>
+                                <span>{{ failures }} failed attempts</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="small-note">No repeated failed logins found in the last 24 hours.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cybersecurity Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="notification-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification notification-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="dashboard-shell">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">AI-powered security analysis</p>
+                <h1>Cybersecurity Assistant</h1>
+                <p class="subtitle">Get personalized security recommendations and password safety tips.</p>
+            </div>
+            <div class="header-actions">
+                <p class="user-pill">Signed in as <strong>{{ username }}</strong></p>
+                <a href="/dashboard" class="btn btn-secondary">Back to Vault</a>
+                <button id="theme-toggle" class="btn btn-secondary" type="button">Light mode</button>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="vault-card glass-card">
+                <div class="card-head">
+                    <h2>Risk Assessment Dashboard</h2>
+                    <span class="chip">Risk Analysis</span>
+                </div>
+
+                <div class="risk-overview">
+                    <div class="risk-score-card">
+                        <div class="risk-score-display">
+                            <div class="risk-score-number">{{ risk_assessment.overall_score }}</div>
+                            <div class="risk-score-label">Overall Risk Score</div>
+                        </div>
+                        <div class="risk-level-badge risk-level-{{ risk_assessment.risk_level.lower() }}">
+                            {{ risk_assessment.risk_level }}
+                        </div>
+                    </div>
+
+                    <div class="risk-breakdown">
+                        <h3>Risk Factors</h3>
+                        <div class="risk-factors-grid">
+                            <div class="risk-factor">
+                                <div class="factor-name">Password Reuse</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.password_reuse }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.password_reuse) }}</div>
+                            </div>
+                            <div class="risk-factor">
+                                <div class="factor-name">Weak Patterns</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.weak_patterns }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.weak_patterns) }}</div>
+                            </div>
+                            <div class="risk-factor">
+                                <div class="factor-name">Breach History</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.breach_history }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.breach_history) }}</div>
+                            </div>
+                            <div class="risk-factor">
+                                <div class="factor-name">Password Strength</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.password_strength }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.password_strength) }}</div>
+                            </div>
+                            <div class="risk-factor">
+                                <div class="factor-name">Category Risk</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.category_criticality }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.category_criticality) }}</div>
+                            </div>
+                            <div class="risk-factor">
+                                <div class="factor-name">Uniqueness</div>
+                                <div class="factor-bar">
+                                    <div class="factor-fill" style="width: {{ risk_assessment.risk_factors.uniqueness }}%"></div>
+                                </div>
+                                <div class="factor-value">{{ "%.1f"|format(risk_assessment.risk_factors.uniqueness) }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if risk_assessment.category_scores %}
+                    <div class="category-risks">
+                        <h3>Risk by Category</h3>
+                        <div class="category-risk-list">
+                            {% for category, data in risk_assessment.category_scores.items() %}
+                            <div class="category-risk-item">
+                                <div class="category-name">{{ category|title }}</div>
+                                <div class="category-stats">
+                                    <span class="category-count">{{ data.count }} accounts</span>
+                                    <span class="category-score">{{ "%.1f"|format(data.average_risk) }}</span>
+                                </div>
+                                <div class="category-bar">
+                                    <div class="category-fill" style="width: {{ data.average_risk }}%"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="vault-card glass-card">
+                <div class="card-head">
+                    <h2>Security Analysis Results</h2>
+                    <span class="chip">AI Analysis</span>
+                </div>
+
+                {% if recommendations %}
+                    <div class="recommendations-list">
+                        {% for rec in recommendations %}
+                            <div class="recommendation-card recommendation-{{ rec.type }}">
+                                <div class="recommendation-header">
+                                    <h3>{{ rec.title }}</h3>
+                                    <span class="recommendation-type">{{ rec.type|title }}</span>
+                                </div>
+                                <p class="recommendation-message">{{ rec.message }}</p>
+                                
+                                {% if rec.details %}
+                                    <div class="recommendation-details">
+                                        {% for detail in rec.details %}
+                                            <div class="detail-item">
+                                                <strong>{{ detail.website }} ({{ detail.username }})</strong>
+                                                <ul>
+                                                    {% for issue in detail.issues %}
+                                                        <li>{{ issue }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-recommendations">
+                        <h3>🎉 Excellent Security!</h3>
+                        <p>Your passwords appear to be strong and secure. Keep up the good work!</p>
+                        <p>Remember to regularly update your passwords and enable two-factor authentication where possible.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="vault-card glass-card">
+                <div class="card-head">
+                    <h2>Password Security Tips</h2>
+                    <span class="chip">Best Practices</span>
+                </div>
+                
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <h4>🔐 Use Strong Passwords</h4>
+                        <p>Combine uppercase, lowercase, numbers, and special characters. Aim for at least 12 characters.</p>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <h4>🚫 Avoid Password Reuse</h4>
+                        <p>Use unique passwords for each account to prevent domino-effect breaches.</p>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <h4>🔄 Regular Updates</h4>
+                        <p>Change passwords every 3-6 months, especially for important accounts.</p>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <h4>📱 Enable 2FA</h4>
+                        <p>Add two-factor authentication to critical accounts for extra protection.</p>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <h4>🛡️ Monitor Breaches</h4>
+                        <p>Regularly check if your passwords have been compromised in data breaches.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

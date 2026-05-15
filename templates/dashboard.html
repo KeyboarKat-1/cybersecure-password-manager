@@ -4,102 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
+    <div class="notification-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification notification-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
-    <div class="container large-container">
+    <div class="dashboard-shell">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">Secure password manager</p>
+                <h1>Password Vault</h1>
+                <p class="subtitle">Manage your credentials safely with fast access and strong protection.</p>
+            </div>
+            <div class="header-actions">
+                <p class="user-pill">Signed in as <strong>{{ username }}</strong></p>
+                <a href="/setup-2fa" class="btn btn-secondary">🔐 2FA Settings</a>
+                {% if is_admin %}
+                    <a href="/admin" class="btn btn-primary">Admin Console</a>
+                {% endif %}
+                <a href="/ai-assistant" class="btn btn-primary">AI Assistant</a>
+                <button id="theme-toggle" class="btn btn-secondary" type="button">Light mode</button>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
 
-        <h1>Password Vault 🔐</h1>
+        <main class="dashboard-grid">
+            <section class="vault-card glass-card">
+                <div class="card-head">
+                    <h2>Add new credential</h2>
+                    <span class="chip">Fast save</span>
+                </div>
 
-        <p>Welcome, {{ username }}</p>
+                <form method="POST" class="vault-form">
+                    <label>
+                        <span>Website</span>
+                        <input type="text" name="website" placeholder="Website Name" required>
+                    </label>
 
-        <a href="/logout">
-            <button>Logout</button>
-        </a>
+                    <label>
+                        <span>Category</span>
+                        <select id="website-category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="banking">🏦 Banking & Finance</option>
+                            <option value="social">📱 Social Media</option>
+                            <option value="email">📧 Email</option>
+                            <option value="shopping">🛒 Shopping</option>
+                            <option value="work">💼 Work & Business</option>
+                            <option value="entertainment">🎮 Entertainment</option>
+                            <option value="education">📚 Education</option>
+                            <option value="health">🏥 Health & Medical</option>
+                            <option value="government">🏛️ Government</option>
+                            <option value="other">🔐 Other</option>
+                        </select>
+                    </label>
 
-        <br><br>
+                    <label>
+                        <span>Username</span>
+                        <input type="text" name="account_username" placeholder="Account Username" required>
+                    </label>
 
-        <form method="POST">
+                    <div class="generator-panel">
+                        <div class="generator-tabs">
+                            <button type="button" class="tab-button active" data-tab="smart">🧠 Smart Generation</button>
+                            <button type="button" class="tab-button" data-tab="custom">⚙️ Custom</button>
+                        </div>
 
-            <input type="text"
-                   name="website"
-                   placeholder="Website Name"
-                   required>
+                        <div id="smart-generator" class="generator-content active">
+                            <div class="smart-options">
+                                <div class="smart-row">
+                                    <label class="smart-option">
+                                        <input id="smart-memorable" type="checkbox" checked>
+                                        <span>Memorable pattern</span>
+                                    </label>
+                                    <label class="smart-option">
+                                        <input id="smart-numbers" type="checkbox" checked>
+                                        <span>Include numbers</span>
+                                    </label>
+                                </div>
+                                <div class="smart-row">
+                                    <label class="smart-option">
+                                        <input id="smart-symbols" type="checkbox">
+                                        <span>Include symbols</span>
+                                    </label>
+                                    <label class="smart-option">
+                                        <input id="smart-uppercase" type="checkbox" checked>
+                                        <span>Mixed case</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary generator-button" onclick="generateSmartPassword()">Generate Smart Password</button>
+                            <p class="generator-tip">Creates memorable passwords based on your selected category</p>
+                        </div>
 
-            <input type="text"
-                   name="account_username"
-                   placeholder="Account Username"
-                   required>
+                        <div id="custom-generator" class="generator-content">
+                            <div class="generator-row">
+                                <label class="generator-option"><input id="generate-upper" type="checkbox" checked> Uppercase</label>
+                                <label class="generator-option"><input id="generate-lower" type="checkbox" checked> Lowercase</label>
+                            </div>
+                            <div class="generator-row">
+                                <label class="generator-option"><input id="generate-numbers" type="checkbox" checked> Numbers</label>
+                                <label class="generator-option"><input id="generate-symbols" type="checkbox" checked> Special chars</label>
+                            </div>
+                            <div class="generator-row range-row">
+                                <label class="range-label">Length <span id="length-value">16</span></label>
+                                <input id="password-length" type="range" min="8" max="32" value="16">
+                            </div>
+                            <button type="button" class="btn btn-secondary generator-button" onclick="generatePassword()">Generate password</button>
+                        </div>
+                    </div>
 
-            <input type="password"
-                   name="account_password"
-                   placeholder="Password"
-                   required>
+                    <label>
+                        <span>Password</span>
+                        <input id="account_password" type="password" name="account_password" placeholder="Password" required>
+                    </label>
 
-            <button type="submit">
-                Save Password
-            </button>
+                    <section class="password-strength-panel">
+                        <div class="strength-header">
+                            <div>
+                                <p class="strength-title">Security score</p>
+                                <p class="strength-subtitle">Entropy, attack difficulty, and strength grade.</p>
+                            </div>
+                            <span id="strength-grade" class="strength-pill strength-fair">Fair</span>
+                        </div>
 
-        </form>
+                        <div class="strength-meter">
+                            <div id="strength-bar" class="strength-bar"></div>
+                        </div>
 
-        <h3>{{ strength_message }}</h3>
+                        <div class="strength-grid">
+                            <div class="strength-card">
+                                <p class="card-label">Entropy</p>
+                                <strong id="entropy-value">0 bits</strong>
+                            </div>
+                            <div class="strength-card">
+                                <p class="card-label">Attack time</p>
+                                <strong id="attack-value">Instant</strong>
+                            </div>
+                            <div class="strength-card full-width">
+                                <p class="card-label">Recommendations</p>
+                                <p id="recommendations" class="card-note">Use more character types and a longer password for stronger protection.</p>
+                            </div>
+                        </div>
+                    </section>
 
-        <h2>Saved Passwords</h2>
+                    <button type="submit" class="btn btn-primary">Save Password</button>
+                </form>
+            </section>
 
-        <table>
+            <section class="table-card glass-card">
+                <div class="card-head">
+                    <h2>Saved passwords</h2>
+                    <p class="meta">Quickly reveal or remove entries from your vault.</p>
+                </div>
 
-            <tr>
-                <th>Website</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Action</th>
-            </tr>
+                <div class="search-filter-section">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="password-search" placeholder="Search websites, usernames, or categories..." class="search-input">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                        <div class="filter-buttons">
+                            <button type="button" class="filter-btn active" data-filter="all">All</button>
+                            <button type="button" class="filter-btn" data-filter="critical">Critical Risk</button>
+                            <button type="button" class="filter-btn" data-filter="high">High Risk</button>
+                            <button type="button" class="filter-btn" data-filter="medium">Medium Risk</button>
+                            <button type="button" class="filter-btn" data-filter="low">Low Risk</button>
+                            <button type="button" class="filter-btn" data-filter="breached">Breached</button>
+                        </div>
+                    </div>
+                    <div class="search-results">
+                        <span id="result-count">Showing all entries</span>
+                    </div>
+                </div>
 
-            {% for entry in entries %}
+                <div class="export-section">
+                    <div class="export-container">
+                        <h3>Export Passwords</h3>
+                        <p class="export-description">Download your passwords as an encrypted file. You'll need a password to protect the export.</p>
+                        <form id="export-form" class="export-form">
+                            <div class="export-input-group">
+                                <label for="export-password">Export Password</label>
+                                <input type="password" id="export-password" name="export_password"
+                                       placeholder="Enter a strong password to encrypt the file" required minlength="8">
+                                <small>Minimum 8 characters. This password will be required to decrypt the file.</small>
+                            </div>
+                            <div class="export-buttons">
+                                <button type="button" class="btn btn-secondary export-btn" data-format="csv">
+                                    📊 Export as CSV
+                                </button>
+                                <button type="button" class="btn btn-secondary export-btn" data-format="json">
+                                    📄 Export as JSON
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-            <tr>
-
-                <td>{{ entry.website }}</td>
-
-                <td>{{ entry.account_username }}</td>
-
-                <td>
-
-                    <span id="password-{{ entry.id }}">
-                        ********
-                    </span>
-
-                    <br><br>
-
-                    <button
-                        type="button"
-                        class="show-btn"
-                        onclick="togglePassword('{{ entry.id }}', '{{ entry.account_password }}')">
-
-                        👁 Show
-
-                    </button>
-
-                </td>
-
-                <td>
-                    <a href="/delete/{{ entry.id }}">
-                        Delete
-                    </a>
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </table>
-
+                <div class="table-scroll">
+                    <table id="password-table">
+                        <thead>
+                            <tr>
+                                <th>Website</th>
+                                <th>Category</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Risk</th>
+                                <th>Breach</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in entries %}
+                            <tr>
+                                <td>{{ entry.website }}</td>
+                                <td>
+                                    <span class="category-badge">{{ entry.category|title if entry.category else 'Other' }}</span>
+                                </td>
+                                <td>{{ entry.account_username }}</td>
+                                <td>
+                                    <div class="password-cell">
+                                        <span id="password-{{ entry.id }}" class="password-value" data-password="{{ entry.account_password }}">********</span>
+                                        <div class="password-actions">
+                                            <button type="button" class="btn btn-ghost show-btn" data-revealed="false" onclick="togglePassword('{{ entry.id }}', '{{ entry.account_password }}', this)">
+                                                <span class="show-icon">👁</span>
+                                                <span class="show-label">Show</span>
+                                            </button>
+                                            <button type="button" class="btn btn-ghost copy-btn" onclick="copyPassword('{{ entry.id }}')">📋 Copy</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="risk-badge risk-{{ entry.risk_level }}">{{ "%.0f"|format(entry.risk_score) }}</span>
+                                </td>
+                                <td>
+                                    {% if entry.breach_count is none %}
+                                        <span class="badge badge-unknown">Unknown</span>
+                                    {% elif entry.breach_count > 0 %}
+                                        <span class="badge badge-breach">Breached {{ entry.breach_count }}</span>
+                                    {% else %}
+                                        <span class="badge badge-safe">Safe</span>
+                                    {% endif %}
+                                </td>
+                                <td><a href="/delete/{{ entry.id }}" class="delete-link">Delete</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
 </html>

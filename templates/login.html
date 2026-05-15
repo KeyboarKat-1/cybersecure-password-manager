@@ -11,6 +11,19 @@
 
     <div class="container">
 
+        <div class="notification-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="notification notification-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
         <h1>Login</h1>
 
         <form method="POST">

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication Setup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="notification-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="notification notification-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        {% if step == "setup" %}
+        <h1>Two-Factor Authentication</h1>
+
+        <div class="setup-info">
+            {% if user.two_factor_enabled %}
+                <div class="status-enabled">
+                    <h2>✅ Two-Factor Authentication is Enabled</h2>
+                    <p>Your account is protected with an additional layer of security.</p>
+                </div>
+            {% else %}
+                <div class="status-disabled">
+                    <h2>🔒 Enable Two-Factor Authentication</h2>
+                    <p>Add an extra layer of security to your account with time-based one-time passwords (TOTP).</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="setup-actions">
+            {% if not user.two_factor_enabled %}
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="action" value="enable">
+                    <button type="submit" class="btn-primary">Enable 2FA</button>
+                </form>
+            {% else %}
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="action" value="disable">
+                    <button type="submit" class="btn-danger" onclick="return confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.')">Disable 2FA</button>
+                </form>
+            {% endif %}
+        </div>
+
+        {% elif step == "verify" %}
+        <h1>Verify Your Authenticator App</h1>
+
+        <div class="qr-section">
+            <h2>Step 1: Scan QR Code</h2>
+            <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):</p>
+
+            <div class="qr-code-container">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="qr-code">
+            </div>
+
+            <div class="manual-entry">
+                <p><strong>Can't scan the code?</strong> Enter this key manually:</p>
+                <code class="secret-key">{{ secret }}</code>
+                <button type="button" onclick="copySecret()" class="btn-secondary">Copy Key</button>
+            </div>
+        </div>
+
+        <div class="verify-section">
+            <h2>Step 2: Enter Verification Code</h2>
+            <p>Enter the 6-digit code from your authenticator app to complete setup:</p>
+
+            <form method="POST" class="verify-form">
+                <input type="hidden" name="action" value="verify">
+
+                <div class="otp-input-group">
+                    <label for="otp_code">Verification Code</label>
+                    <input type="text"
+                           id="otp_code"
+                           name="otp_code"
+                           placeholder="000000"
+                           pattern="[0-9]{6}"
+                           maxlength="6"
+                           required
+                           autocomplete="off">
+                    <small>Enter the 6-digit code from your authenticator app</small>
+                </div>
+
+                <button type="submit" class="btn-primary">Verify & Enable 2FA</button>
+            </form>
+        </div>
+
+        {% endif %}
+
+        <div class="back-link">
+            <a href="/dashboard" class="btn-secondary">← Back to Dashboard</a>
+        </div>
+
+    </div>
+
+    <script>
+        // Auto-focus the OTP input if in verify step
+        {% if step == "verify" %}
+        document.getElementById('otp_code').focus();
+
+        // Auto-submit when 6 digits are entered
+        document.getElementById('otp_code').addEventListener('input', function(e) {
+            if (this.value.length === 6) {
+                this.form.submit();
+            }
+        });
+        {% endif %}
+
+        function copySecret() {
+            const secretKey = '{{ secret }}';
+            navigator.clipboard.writeText(secretKey).then(function() {
+                alert('Secret key copied to clipboard!');
+            }).catch(function(err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = secretKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Secret key copied to clipboard!');
+            });
+        }
+    </script>
+
+</body>
+</html>
