@@ -18,21 +18,57 @@ import secrets
 import pyotp
 import qrcode
 import io as StringIO
+import os
+import logging
 
+# ========== PRODUCTION DEPLOYMENT CONFIGURATION ==========
+# Configure logging for production monitoring
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize Flask application
 app = Flask(__name__)
 
-app.secret_key = "supersecretkey"
+# ========== SECURITY CONFIGURATION ==========
+# SECRET_KEY: Use environment variable in production, fallback to default for development
+# NEVER hardcode secrets in production code
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', "supersecretkey")
+if app.secret_key == "supersecretkey" and os.environ.get('FLASK_ENV') == 'production':
+    logger.warning("WARNING: Using default secret key in production. Set FLASK_SECRET_KEY environment variable.")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+# ========== DATABASE CONFIGURATION ==========
+# Support both SQLite (local development) and other databases in production
+# For Render deployment, you can use PostgreSQL: DATABASE_URL
+db_url = os.environ.get('DATABASE_URL')
+if db_url:
+    # Production database (e.g., PostgreSQL on Render)
+    # Handle postgresql:// URLs that need psycopg2
+    if db_url.startswith('postgresql://'):
+        db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+else:
+    # Development/local database (SQLite)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
+# Disable modification tracking to reduce memory usage in production
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# ========== SESSION CONFIGURATION ==========
 SESSION_TIMEOUT = timedelta(minutes=30)  # Inactivity timeout
+# In production, configure session cookies to be secure
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 db = SQLAlchemy(app)
 
-# ---------------- ENCRYPTION SETUP ---------------- #
-
-key = b'6V4m1m7V9z0WgY3M5oYt6z1V4n8m2K5jL0pQxR7sT8U='
-
+# ========== ENCRYPTION SETUP ==========
+# IMPORTANT: Encryption key should be rotated regularly and stored securely
+# In production, use environment variables or secure key management services
+key = os.environ.get('ENCRYPTION_KEY', b'6V4m1m7V9z0WgY3M5oYt6z1V4n8m2K5jL0pQxR7sT8U=')
+if isinstance(key, str):
+    key = key.encode()
 cipher = Fernet(key)
 
 MAX_LOGIN_ATTEMPTS = 5
@@ -164,11 +200,177 @@ def is_admin_user():
     return session.get('user') in ADMIN_USERNAMES
 
 
+# ---------------- DEMO DATA ---------------- #
+
+DEFAULT_DEMO_ENTRIES = [
+    {
+        "id": 1,
+        "website": "Gmail",
+        "category": "email",
+        "username": "demo.user@gmail.com",
+        "account_password": "SecureGm@il2026",
+        "risk_level": "High",
+        "risk_score": 72,
+        "breach_status": "Breached",
+        "breach_count": 3
+    },
+    {
+        "id": 2,
+        "website": "GitHub",
+        "category": "development",
+        "username": "cybersecure_demo",
+        "account_password": "GhP@ss!2026",
+        "risk_level": "Medium",
+        "risk_score": 48,
+        "breach_status": "Safe",
+        "breach_count": 0
+    },
+    {
+        "id": 3,
+        "website": "LinkedIn",
+        "category": "professional",
+        "username": "demo.security",
+        "account_password": "Linked!nDemo22",
+        "risk_level": "Low",
+        "risk_score": 28,
+        "breach_status": "Safe",
+        "breach_count": 0
+    },
+    {
+        "id": 4,
+        "website": "Amazon",
+        "category": "shopping",
+        "username": "demo.cust@amazon.com",
+        "account_password": "Am@z0nShop22",
+        "risk_level": "Critical",
+        "risk_score": 84,
+        "breach_status": "Breached",
+        "breach_count": 5
+    },
+    {
+        "id": 5,
+        "website": "Banking App",
+        "category": "banking",
+        "username": "demo.bankuser",
+        "account_password": "Bank$ecure1",
+        "risk_level": "High",
+        "risk_score": 66,
+        "breach_status": "Safe",
+        "breach_count": 0
+    }
+]
+
+
+def build_demo_data():
+    return [dict(entry) for entry in DEFAULT_DEMO_ENTRIES]
+
+
+def get_demo_data():
+    if "demo_data" not in session:
+        session["demo_data"] = build_demo_data()
+    return session["demo_data"]
+
+
+def compute_demo_stats(entries):
+    total_passwords = len(entries)
+    weak_passwords = sum(1 for item in entries if len(item["account_password"]) < 12 or item["risk_score"] >= 60)
+    active_breach_alerts = sum(1 for item in entries if item["breach_status"] == "Breached")
+    security_score = max(100 - sum(item["risk_score"] for item in entries) / total_passwords, 18) if total_passwords else 100
+    return {
+        "total_passwords": total_passwords,
+        "weak_passwords": weak_passwords,
+        "security_score": round(security_score, 0),
+        "active_breach_alerts": active_breach_alerts
+    }
+
+
+def compute_demo_recommendations(entries):
+    recommendations = []
+    for item in entries:
+        if item["risk_level"] in ["High", "Critical"]:
+            recommendations.append(f"Weak password detected for {item['website']}. Consider generating a stronger secret.")
+        if item["website"] in ["Gmail", "GitHub", "LinkedIn"] and item["risk_level"] != "Excellent":
+            recommendations.append(f"Enable 2FA for your {item['website']} account to protect against account takeover.")
+        if item["breach_status"] == "Breached":
+            recommendations.append(f"Password for {item['website']} was found in previous breaches. Rotate it immediately.")
+    recommendations.append("Review AI security recommendations to harden your demo vault.")
+    return recommendations
+
+
 # ---------------- HOME ---------------- #
 
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+# ---------------- DEMO MODE ---------------- #
+
+@app.route("/demo")
+def demo():
+    demo_entries = get_demo_data()
+    stats = compute_demo_stats(demo_entries)
+    recommendations = compute_demo_recommendations(demo_entries)
+    return render_template(
+        "demo_dashboard.html",
+        entries=demo_entries,
+        demo_stats=stats,
+        demo_recommendations=recommendations
+    )
+
+
+@app.route("/demo/reset")
+def reset_demo():
+    session["demo_data"] = build_demo_data()
+    flash("Demo data has been reset to the original enterprise sample set.", "success")
+    return redirect(url_for("demo"))
+
+
+@app.route("/demo/export/<format_type>", methods=["POST"])
+def export_demo_data(format_type):
+    demo_entries = get_demo_data()
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    if format_type == "csv":
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=["website", "username", "account_password", "risk_level", "breach_status"])
+        writer.writeheader()
+        for entry in demo_entries:
+            writer.writerow({
+                "website": entry["website"],
+                "username": entry["username"],
+                "account_password": entry["account_password"],
+                "risk_level": entry["risk_level"],
+                "breach_status": entry["breach_status"]
+            })
+        content = output.getvalue()
+    elif format_type == "json":
+        content = json.dumps({
+            "demo_export": {
+                "name": "CyberSecure Demo",
+                "generated_at": datetime.utcnow().isoformat(),
+                "records": len(demo_entries)
+            },
+            "entries": [
+                {
+                    "website": entry["website"],
+                    "username": entry["username"],
+                    "account_password": entry["account_password"],
+                    "risk_level": entry["risk_level"],
+                    "breach_status": entry["breach_status"]
+                }
+                for entry in demo_entries
+            ]
+        }, indent=2)
+    else:
+        flash("Invalid demo export format.", "error")
+        return redirect(url_for("demo"))
+
+    response = make_response(content)
+    response.headers["Content-Type"] = "application/octet-stream"
+    response.headers["Content-Disposition"] = f"attachment; filename=cybersecure_demo_export_{timestamp}.{format_type}"
+    flash(f"Demo data exported successfully as {format_type.upper()}.", "success")
+    return response
 
 
 # ---------------- REGISTER ---------------- #
@@ -1095,11 +1297,24 @@ def query_pwned_password(password):
     except (urllib.error.URLError, urllib.error.HTTPError, ValueError):
         return None
 
-# ---------------- DATABASE CREATE ---------------- #
-
+# ========== DEPLOYMENT CONFIGURATION ==========
+# This block is ONLY executed when running locally (not with Gunicorn)
+# Gunicorn directly imports and uses the 'app' object, skipping this block
 if __name__ == "__main__":
-
+    # Create database tables on startup (only in development)
     with app.app_context():
         db.create_all()
-
-    app.run(debug=True)
+    
+    # Get port from environment variable (Render sets PORT automatically)
+    port = int(os.environ.get('PORT', 5000))
+    
+    # Get debug mode from environment (default: False for production)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    
+    # Run the Flask development server (NOT used in production with Gunicorn)
+    # In production on Render, Gunicorn runs the app with the Procfile configuration
+    app.run(
+        host='0.0.0.0',  # Listen on all interfaces
+        port=port,
+        debug=debug_mode
+    )

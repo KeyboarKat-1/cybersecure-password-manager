@@ -370,6 +370,125 @@ input:focus {
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 
+.btn-glow {
+    color: #eef5ff;
+    background: linear-gradient(135deg, rgba(0,212,255,0.9), rgba(99,102,241,0.95));
+    box-shadow: 0 0 28px rgba(0,212,255,0.28), 0 12px 24px rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,212,255,0.35);
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 0 38px rgba(0,212,255,0.42), 0 16px 32px rgba(0,0,0,0.22);
+}
+
+.demo-banner {
+    background: linear-gradient(90deg, rgba(51,217,255,0.16), rgba(99,102,241,0.1));
+    border: 1px solid rgba(51,217,255,0.18);
+    color: #e5f7ff;
+    padding: 18px 24px;
+    text-align: center;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(18px);
+}
+
+.dashboard-header-demo {
+    border-color: rgba(0,212,255,0.18);
+}
+
+.demo-metrics {
+    margin-bottom: 24px;
+}
+
+.demo-dashboard-grid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+}
+
+.demo-overview-card,
+.demo-panel-card,
+.demo-generator-card {
+    background: rgba(12,22,38,0.92);
+    border: 1px solid rgba(51,217,255,0.14);
+}
+
+.demo-recommendations .recommendation-card {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(51,217,255,0.12);
+}
+
+.demo-actions {
+    margin-top: 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.demo-export-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.demo-generator-card .generator-panel {
+    background: rgba(255,255,255,0.06);
+}
+
+.demo-table tbody tr {
+    background: rgba(255,255,255,0.04);
+}
+
+.demo-table th,
+.demo-table td {
+    color: #d8e7ff;
+}
+
+.demo-table thead th {
+    border-bottom-color: rgba(255,255,255,0.12);
+}
+
+.risk-badge {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.risk-critical {
+    background: rgba(255,107,107,0.16);
+    color: #ffb3b3;
+}
+
+.risk-high {
+    background: rgba(255,183,3,0.16);
+    color: #ffe8a1;
+}
+
+.risk-medium {
+    background: rgba(255,255,255,0.08);
+    color: #dbeafe;
+}
+
+.risk-low {
+    background: rgba(32,201,151,0.16);
+    color: #b7f2d0;
+}
+
+.demo-generator-card input[readonly] {
+    background: rgba(255,255,255,0.06);
+}
+
+@media (max-width: 1024px) {
+    .demo-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 body.light-mode .btn-secondary {
     background: rgba(16,52,88,0.12);
     border-color: rgba(16,52,88,0.18);

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSecure Demo Mode</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="demo-page">
+    <div class="notification-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification notification-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="notification-close" aria-label="Dismiss message">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <header class="demo-banner">
+        <p>🚀 You are currently exploring CyberSecure Demo Mode</p>
+    </header>
+
+    <div class="dashboard-shell">
+        <header class="dashboard-header dashboard-header-demo">
+            <div>
+                <p class="eyebrow">Demo Vault Experience</p>
+                <h1>Enterprise Demo Dashboard</h1>
+                <p class="subtitle">Explore CyberSecure with preloaded enterprise-level demo data and security analytics.</p>
+            </div>
+            <div class="header-actions">
+                <a href="/" class="btn btn-secondary">Back to Home</a>
+                <a href="/demo/reset" class="btn btn-glow">Reset Demo Data</a>
+                <a href="/login" class="btn btn-secondary">Login</a>
+                <button id="theme-toggle" class="btn btn-secondary" type="button">Light mode</button>
+            </div>
+        </header>
+
+        <section class="demo-metrics">
+            <div class="metrics-grid">
+                <article class="metric-card metric-primary">
+                    <p class="metric-label">Total Passwords</p>
+                    <strong>{{ demo_stats.total_passwords }}</strong>
+                </article>
+                <article class="metric-card metric-warning">
+                    <p class="metric-label">Weak Passwords</p>
+                    <strong>{{ demo_stats.weak_passwords }}</strong>
+                </article>
+                <article class="metric-card metric-info">
+                    <p class="metric-label">Security Score</p>
+                    <strong>{{ demo_stats.security_score }}%</strong>
+                </article>
+                <article class="metric-card metric-danger">
+                    <p class="metric-label">Active Breach Alerts</p>
+                    <strong>{{ demo_stats.active_breach_alerts }}</strong>
+                </article>
+            </div>
+        </section>
+
+        <main class="dashboard-grid demo-dashboard-grid">
+            <section class="glass-card demo-overview-card">
+                <div class="card-head">
+                    <h2>Demo Vault</h2>
+                    <p class="meta">Browse fake enterprise password entries with risk insights and breach monitoring.</p>
+                </div>
+
+                <div class="search-filter-section">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="password-search" placeholder="Search websites, usernames, or risk levels..." class="search-input">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                        <div class="filter-buttons">
+                            <button type="button" class="filter-btn active" data-filter="all">All</button>
+                            <button type="button" class="filter-btn" data-filter="high">High Risk</button>
+                            <button type="button" class="filter-btn" data-filter="medium">Medium Risk</button>
+                            <button type="button" class="filter-btn" data-filter="low">Low Risk</button>
+                            <button type="button" class="filter-btn" data-filter="critical">Critical</button>
+                        </div>
+                    </div>
+                    <div class="export-section demo-export-section">
+                        <form action="{{ url_for('export_demo_data', format_type='csv') }}" method="POST" class="export-form">
+                            <button type="submit" class="btn btn-secondary export-btn">📊 Export CSV</button>
+                        </form>
+                        <form action="{{ url_for('export_demo_data', format_type='json') }}" method="POST" class="export-form">
+                            <button type="submit" class="btn btn-secondary export-btn">📄 Export JSON</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-scroll">
+                    <table id="password-table" class="demo-table">
+                        <thead>
+                            <tr>
+                                <th>Website</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Risk</th>
+                                <th>Breach</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in entries %}
+                                <tr>
+                                    <td>{{ entry.website }}</td>
+                                    <td>{{ entry.username }}</td>
+                                    <td>
+                                        <div class="password-cell">
+                                            <span id="password-{{ entry.id }}" class="password-value" data-password="{{ entry.account_password }}">********</span>
+                                            <button type="button" class="btn btn-ghost show-btn" onclick="togglePassword('{{ entry.id }}', '{{ entry.account_password }}', this)">👁 Show</button>
+                                        </div>
+                                    </td>
+                                    <td><span class="risk-badge risk-{{ entry.risk_level|lower }}">{{ entry.risk_level }}</span></td>
+                                    <td>
+                                        {% if entry.breach_status == 'Breached' %}
+                                            <span class="badge badge-breach">Breached {{ entry.breach_count }}</span>
+                                        {% else %}
+                                            <span class="badge badge-safe">Safe</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="glass-card demo-panel-card">
+                <div class="card-head">
+                    <h2>Security Recommendations</h2>
+                    <p class="meta">AI-driven guidance for the demo vault, designed to feel like an enterprise security advisor.</p>
+                </div>
+                <div class="recommendations-list demo-recommendations">
+                    {% for message in demo_recommendations %}
+                        <div class="recommendation-card recommendation-info">
+                            <div class="recommendation-header">
+                                <h3>🔎 Recommendation</h3>
+                            </div>
+                            <p>{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="demo-actions">
+                    <a href="/ai-assistant" class="btn btn-primary btn-large">Open AI Security Assistant</a>
+                    <a href="/demo/reset" class="btn btn-secondary btn-large">Restore Demo Vault</a>
+                </div>
+            </section>
+
+            <section class="glass-card demo-generator-card">
+                <div class="card-head">
+                    <h2>Password Generator</h2>
+                    <p class="meta">Create a strong demo password instantly and see the generated score in the app.</p>
+                </div>
+                <div class="generator-panel demo-generator-panel">
+                    <div class="generator-row">
+                        <label class="generator-option"><input id="generate-upper" type="checkbox" checked> Uppercase</label>
+                        <label class="generator-option"><input id="generate-lower" type="checkbox" checked> Lowercase</label>
+                    </div>
+                    <div class="generator-row">
+                        <label class="generator-option"><input id="generate-numbers" type="checkbox" checked> Numbers</label>
+                        <label class="generator-option"><input id="generate-symbols" type="checkbox" checked> Special chars</label>
+                    </div>
+                    <div class="generator-row range-row">
+                        <label class="range-label">Length <span id="length-value">16</span></label>
+                        <input id="password-length" type="range" min="12" max="32" value="16">
+                    </div>
+                    <button type="button" class="btn btn-primary generator-button" onclick="generatePassword()">Generate Secure Password</button>
+                    <label>
+                        <span>Password Output</span>
+                        <input id="account_password" type="text" placeholder="Generated password appears here" readonly>
+                    </label>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
