@@ -12,6 +12,7 @@
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
 </head>
 <body>
+    {% include '_loader.html' %}
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -352,5 +353,6 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='landing.js') }}"></script>
+    <script src="{{ url_for('static', filename='loader.js') }}" defer></script>
 </body>
 </html>

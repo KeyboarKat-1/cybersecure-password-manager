@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include '_loader.html' %}
 
     <div class="container">
 
@@ -50,6 +51,6 @@
         </p>
 
     </div>
-
+    <script src="{{ url_for('static', filename='loader.js') }}" defer></script>
 </body>
 </html>

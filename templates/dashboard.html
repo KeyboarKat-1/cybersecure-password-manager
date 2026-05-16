@@ -8,6 +8,7 @@
 </head>
 
 <body>
+    {% include '_loader.html' %}
     <div class="notification-wrapper">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -268,5 +269,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='loader.js') }}" defer></script>
 </body>
 </html>
