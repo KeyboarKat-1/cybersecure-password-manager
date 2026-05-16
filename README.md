@@ -12,6 +12,7 @@ Explore the deployed application here:
 
 👉 [https://cybersecure-password-manager.onrender.com](https://cybersecure-password-manager.onrender.com)
 
+> **Note:** The project is hosted on Render free tier, so the initial startup may take a few seconds after inactivity.
 ## 🚀 Features
 
 - **Secure password vault** for storing encrypted credentials
